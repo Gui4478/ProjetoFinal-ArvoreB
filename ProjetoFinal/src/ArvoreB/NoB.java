@@ -1,6 +1,5 @@
 package ArvoreB;
 
-import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 

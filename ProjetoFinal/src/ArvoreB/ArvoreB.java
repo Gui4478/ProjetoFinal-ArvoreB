@@ -179,7 +179,7 @@ public class ArvoreB {
 			//Caso 3.b - Desloca de algum irmão e tenta novamente 
 			if(retry) {
 				if(noAtual.getFilho(i).isLeaf()) {
-					if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() > t) {
+					if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() >= t) {
 						//passarChaveADireita(noAtual, i-1);
 						int chaveDeslocada = substituirChaveADireita(noAtual.getFilho(i-1));
 						int chaveDesejada = noAtual.getChave(i-1);
@@ -187,7 +187,7 @@ public class ArvoreB {
 						noAtual.getFilho(i).addChave(chaveDesejada);
 						removeChave(chave, noAtual.getFilho(i));
 						
-					} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() > t) {
+					} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() >= t) {
 						int chaveDeslocada = substituirChaveAEsquerda(noAtual.getFilho(i+1));
 						int chaveDesejada = noAtual.getChave(i);
 						noAtual.setChave(i, chaveDeslocada);
