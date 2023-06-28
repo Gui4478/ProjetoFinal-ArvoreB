@@ -24,11 +24,15 @@ public class Principal {
 		
 		//System.out.println(arvore);
 		
-		arvore.removeChave(2);
-		arvore.removeChave(23);
-		arvore.removeChave(24);
+		arvore.removeChave(10);
 		
 		System.out.println(arvore);
+		
+		arvore.removeChave(14);
+		
+		System.out.println(arvore);
+		
+		//Lembrete: estava revisando o caso 2 (.a e .b funcionam, falta .c) 
 		
 		/*
 		arvore.buscarChave(6);

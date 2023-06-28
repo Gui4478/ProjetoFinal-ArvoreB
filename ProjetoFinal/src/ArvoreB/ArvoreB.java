@@ -99,16 +99,19 @@ public class ArvoreB {
 		
 		//...
 		//Caso 3 - remoção por pai
-		//Se (resultado da recurção do filhoA for 'true') //Nota: filhoA é identificado pelo 'i'
-			//Se (há irmãoB do filhoA que possui a chave com t ou mais chaves)
+		//Se (for raiz ou possui t ou mais chaves)
+			//Se (filho(i) e um dos irmãos adjacentes possuem menos de t chaves)
+				//funde filho com um deles
+		
+		//recursão para o próximo nó
+		
+		//Se (resultado da recurção do filhoA for 'true')
+			//Se (há irmãoB do filhoA com t ou mais chaves)
 				//Se (irmãoB for folha)
 					//passar uma chave de B pro pai, e do pai pro A
 				//Senão
-					//metodo de remover chave para retirar uma chave de B e passar pro pai, e do pai pro A 
-			//Senão, Se (é raiz ou possui t ou mais chaves)
-				//funde os filhos e tenta novamente
-			//Senão
-				//retorna true; //deixa o trabalho pro pai
+					//metodo de remover chave para retirar uma chave de B e passar pro pai, e do pai pro A
+					//AVISO: se ele não é folha então também têm que entrar um filho junto, mas isso não é possivel
 		
 		
 		
@@ -122,9 +125,10 @@ public class ArvoreB {
 			i++;
 		}
 		
-		//Procedimentos de resolução
+		//Procedimentos de remoção
 		if(i < noAtual.getSizeOfChaves() && chave == noAtual.getChave(i)) {
-			//Possui a chave a ser deletada
+			//Possui a chave a ser deletada:
+			
 			if(noAtual.isLeaf() && noAtual.getSizeOfChaves() >= t) {
 				//Caso 1 - Remoção simples
 				noAtual.removeChave(i);
@@ -133,12 +137,12 @@ public class ArvoreB {
 				//Caso 2 - Remoção por filho (?)
 				if(noAtual.getFilho(i).getSizeOfChaves() >= t) {
 					//Caso 2.a
-					int novaChave = substituirChaveCaso2A(noAtual.getFilho(i)); //(?)
+					int novaChave = substituirChaveADireita(noAtual.getFilho(i));
 					noAtual.setChave(i, novaChave);
 					
 				} else if(noAtual.getFilho(i+1).getSizeOfChaves() >= t) {
 					//Caso 2.b
-					int novaChave = substituirChaveCaso2B(noAtual.getFilho(i+1)); //(?)
+					int novaChave = substituirChaveAEsquerda(noAtual.getFilho(i+1));
 					noAtual.setChave(i, novaChave);
 					
 				} else if(noAtual.equals(root) || noAtual.getSizeOfChaves() >= t){
@@ -155,7 +159,7 @@ public class ArvoreB {
 				return true;
 			}
 		} else if(!noAtual.isLeaf()) {
-			//Não possui a chave a ser deletada
+			//Não possui a chave a ser deletada:
 			
 			//Caso 3.a
 			//Se (for raiz ou possui t ou mais chaves)
@@ -176,26 +180,29 @@ public class ArvoreB {
 			boolean retry = removeChave(chave, noAtual.getFilho(i));
 			
 			//Caso 3.b
-			if(retry && noAtual.getFilho(i).isLeaf()) {
-				//Se (irmão a esquerda ou a direita possui t ou mais chaves)
-					//passa do irmão pro filho (metodo?)
-				if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() > t) {
-					//passarChaveADireita(noAtual, i-1);
-					int chaveDeslocada = substituirChaveCaso2A(noAtual.getFilho(i-1));
-					
-				} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() > t) {
-					int chaveDeslocada = substituirChaveCaso2B(noAtual.getFilho(i+1));
-					
+			if(retry) {
+				if(noAtual.getFilho(i).isLeaf()) {
+					//Se (irmão a esquerda ou a direita possui t ou mais chaves)
+						//passa do irmão pro filho (metodo?)
+					if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() > t) {
+						//passarChaveADireita(noAtual, i-1);
+						int chaveDeslocada = substituirChaveADireita(noAtual.getFilho(i-1));
+						//...
+						
+					} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() > t) {
+						int chaveDeslocada = substituirChaveAEsquerda(noAtual.getFilho(i+1));
+						//...
+					}
+				} else {
+					System.out.println("Não foi possivel excluir esse nó");
 				}
-			} else {
-				System.out.println("Não foi possivel excluir esse nó");
 			}
 		}
 	
 		return false;
 	}
 	
-	private int substituirChaveCaso2A(NoB noAtual) {//} (?)
+	private int substituirChaveADireita(NoB noAtual) {
 		int index = noAtual.getSizeOfChaves()-1;
 		
 		if(noAtual.isLeaf()) {
@@ -205,20 +212,20 @@ public class ArvoreB {
 			return retorno;
 		} else if(noAtual.getFilho(index+1).getSizeOfChaves() >= t) {
 			
-			return substituirChaveCaso2A(noAtual.getFilho(index+1));
+			return substituirChaveADireita(noAtual.getFilho(index+1));
 		} else if(noAtual.getFilho(index).getSizeOfChaves() >= t) {
 			int retorno = noAtual.getChave(index+1);
-			noAtual.setChave(index, substituirChaveCaso2A(noAtual.getFilho(index)));
+			noAtual.setChave(index, substituirChaveADireita(noAtual.getFilho(index)));
 			
 			return retorno;
 		} else {
-			fundirFilhos(noAtual, index); //(?)
+			fundirFilhos(noAtual, index);
 			
-			return substituirChaveCaso2A(noAtual.getFilho(index));
+			return substituirChaveADireita(noAtual.getFilho(index));
 		}
 	}
 	
-	private int substituirChaveCaso2B(NoB noAtual) {//} (?)
+	private int substituirChaveAEsquerda(NoB noAtual) {
 		if(noAtual.isLeaf()) {
 			int retorno = noAtual.getChave(0);
 			noAtual.removeChave(0);
@@ -226,27 +233,17 @@ public class ArvoreB {
 			return retorno;
 		} else if(noAtual.getFilho(0).getSizeOfChaves() >= t) {
 			
-			return substituirChaveCaso2A(noAtual.getFilho(0));
+			return substituirChaveAEsquerda(noAtual.getFilho(0));
 		} else if(noAtual.getFilho(1).getSizeOfChaves() >= t) {
 			int retorno = noAtual.getChave(0);
-			noAtual.setChave(0, substituirChaveCaso2A(noAtual.getFilho(1)));
+			noAtual.setChave(0, substituirChaveAEsquerda(noAtual.getFilho(1)));
 			
 			return retorno;
 		} else {
-			fundirFilhos(noAtual, 0); //(?)
+			fundirFilhos(noAtual, 0);
 			
-			return substituirChaveCaso2A(noAtual.getFilho(0));
+			return substituirChaveAEsquerda(noAtual.getFilho(0));
 		}
-	}
-	
-	private int passarChaveADireita(NoB noAtual, int index) { //(!)
-		
-		return 0;
-	}
-	
-	private int passarChaveAEsquerda() { //(!)
-		
-		return 0;
 	}
 
 	
