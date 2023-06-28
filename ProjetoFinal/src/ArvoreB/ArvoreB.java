@@ -34,6 +34,7 @@ public class ArvoreB {
 				i++;
 			}
 			
+			//adiciona no próximo e vê se ele está cheio
 			addChave(chave, noAtual.getFilho(i));
 			if(noAtual.getFilho(i).getSizeOfChaves() == 2*t) {
 				splitNo(noAtual, i);
@@ -66,35 +67,212 @@ public class ArvoreB {
 	
 	//remover
 	public void removeChave(int chave) {
-		//recursão até chegar no alvo
+		//recursão até chegar no alvo	
 		
-		//Caso 0? -
-		//Se (há um nó com um irmão adjacente com t-1 chaves pelo caminho)
-			//Esses nós e a chave que os liga são fundidos em um só nó
 		
 		//Caso 1 - remoção simples
-		//Se (for uma folha e tiver mais que t-1 chaves)
+		//Se (for uma folha e tiver t ou mais chaves)
 			//Deleta a chave
+			//return;
 		
-		//Caso 2 -
-		//Senão, se (não for uma folha)
-			//Se (e um dos filhos tiver mais que t-1 chaves)
-				//Deleta e pega de um dos filhos (último da esquerda ou primeiro da direita)
-			//Senão,
+		//Caso 2 - remoção por filhos
+		//Senão, Se (não for uma folha)
+			//Se (um dos filhos tiver t ou mais chaves)
+				//(*) Chama um metodo recursivo que:
+					//Se (for uma folha)
+						//Manda a chave desejada para cima
+					//Senão, Se (um dos filhos adjacentes a chave possui t ou mais chaves)
+						//recursividade para o filho
+						//Manda a chave recebida pra cima
+					//Senão
+						//funde os filhos adjacentes com a chave
+						//recursividade consigo mesmo
+						//manda a chave recebida para cima
+				//Substitue a chave a ser deletada pela recebida
+				//return;
+			//Senão, Se (possui menos que t chaves)
+				//return;
+			//Senão, Se os filhos possuem menos que t chaves)
 				//Desce a chave a ser deletada e a funde com esse filhos
-				//Situação vira um Cado 2 anterior ou um Caso 1
+				//recursividade consigo mesmo
+				//return;
 		
-		//Caso 3 -
-		//Senão, se (o nó possui t-1 chaves)
-			//Se (há um irmão adjacente com mais de t-1 chaves)
-				//Puxa a chave mais proxima dele pro pai e pega a do pai pra se
+		//...
+		//Caso 3 - remoção por pai
+		//Se (resultado da recurção do filhoA for 'true') //Nota: filhoA é identificado pelo 'i'
+			//Se (há irmãoB do filhoA que possui a chave com t ou mais chaves)
+				//Se (irmãoB for folha)
+					//passar uma chave de B pro pai, e do pai pro A
+				//Senão
+					//metodo de remover chave para retirar uma chave de B e passar pro pai, e do pai pro A 
+			//Senão, Se (é raiz ou possui t ou mais chaves)
+				//funde os filhos e tenta novamente
 			//Senão
-				//Escolhe um irmão e se funde come ele, pegando a chave do pai entre eles
-				//Se (o pai ficar com menos de t-1 e não for raiz)
-					//Tentar pegar uma chave de alguém OU se fundir com alguém (preferencialmente)
+				//retorna true; //deixa o trabalho pro pai
 		
-		return;
+		
+		
+		removeChave(chave, root);
 	}
+	
+	private boolean removeChave(int chave, NoB noAtual) {
+		//Acha a chave desejada ou a direção dela
+		int i = 0;
+		while(i < noAtual.getSizeOfChaves() && chave > noAtual.getChave(i)) {
+			i++;
+		}
+		
+		//Procedimentos de resolução
+		if(i < noAtual.getSizeOfChaves() && chave == noAtual.getChave(i)) {
+			//Possui a chave a ser deletada
+			if(noAtual.isLeaf() && noAtual.getSizeOfChaves() >= t) {
+				//Caso 1 - Remoção simples
+				noAtual.removeChave(i);
+				
+			} else if(!noAtual.isLeaf()){
+				//Caso 2 - Remoção por filho (?)
+				if(noAtual.getFilho(i).getSizeOfChaves() >= t) {
+					//Caso 2.a
+					int novaChave = substituirChaveCaso2A(noAtual.getFilho(i)); //(?)
+					noAtual.setChave(i, novaChave);
+					
+				} else if(noAtual.getFilho(i+1).getSizeOfChaves() >= t) {
+					//Caso 2.b
+					int novaChave = substituirChaveCaso2B(noAtual.getFilho(i+1)); //(?)
+					noAtual.setChave(i, novaChave);
+					
+				} else if(noAtual.equals(root) || noAtual.getSizeOfChaves() >= t){
+					//Caso 2.c
+					fundirFilhos(noAtual, i); //(?)
+					removeChave(chave, noAtual.getFilho(i));
+					
+				} else {
+					
+					return true;
+				}
+			} else {
+				
+				return true;
+			}
+		} else if(!noAtual.isLeaf()) {
+			//Não possui a chave a ser deletada
+			
+			//Caso 3.a
+			//Se (for raiz ou possui t ou mais chaves)
+				//Se (filho(i) e os dois irmãos adjacentes possuem menos de t chaves)
+					//funde filho com um deles
+			if((noAtual.equals(root) || noAtual.getSizeOfChaves() >= t) && (noAtual.getFilho(i).getSizeOfChaves() < t)) {
+				if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() < t) {
+					fundirFilhos(noAtual, i-1);
+				} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() < t) {
+					fundirFilhos(noAtual, i);
+				}
+			}
+			if(root.getSizeOfChaves() == 0) {
+				root = root.getFilho(0);
+			}
+			
+			
+			boolean retry = removeChave(chave, noAtual.getFilho(i));
+			
+			//Caso 3.b
+			if(retry && noAtual.getFilho(i).isLeaf()) {
+				//Se (irmão a esquerda ou a direita possui t ou mais chaves)
+					//passa do irmão pro filho (metodo?)
+				if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() > t) {
+					//passarChaveADireita(noAtual, i-1);
+					int chaveDeslocada = substituirChaveCaso2A(noAtual.getFilho(i-1));
+					
+				} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() > t) {
+					int chaveDeslocada = substituirChaveCaso2B(noAtual.getFilho(i+1));
+					
+				}
+			} else {
+				System.out.println("Não foi possivel excluir esse nó");
+			}
+		}
+	
+		return false;
+	}
+	
+	private int substituirChaveCaso2A(NoB noAtual) {//} (?)
+		int index = noAtual.getSizeOfChaves()-1;
+		
+		if(noAtual.isLeaf()) {
+			int retorno = noAtual.getChave(index);
+			noAtual.removeChave(index);
+			
+			return retorno;
+		} else if(noAtual.getFilho(index+1).getSizeOfChaves() >= t) {
+			
+			return substituirChaveCaso2A(noAtual.getFilho(index+1));
+		} else if(noAtual.getFilho(index).getSizeOfChaves() >= t) {
+			int retorno = noAtual.getChave(index+1);
+			noAtual.setChave(index, substituirChaveCaso2A(noAtual.getFilho(index)));
+			
+			return retorno;
+		} else {
+			fundirFilhos(noAtual, index); //(?)
+			
+			return substituirChaveCaso2A(noAtual.getFilho(index));
+		}
+	}
+	
+	private int substituirChaveCaso2B(NoB noAtual) {//} (?)
+		if(noAtual.isLeaf()) {
+			int retorno = noAtual.getChave(0);
+			noAtual.removeChave(0);
+			
+			return retorno;
+		} else if(noAtual.getFilho(0).getSizeOfChaves() >= t) {
+			
+			return substituirChaveCaso2A(noAtual.getFilho(0));
+		} else if(noAtual.getFilho(1).getSizeOfChaves() >= t) {
+			int retorno = noAtual.getChave(0);
+			noAtual.setChave(0, substituirChaveCaso2A(noAtual.getFilho(1)));
+			
+			return retorno;
+		} else {
+			fundirFilhos(noAtual, 0); //(?)
+			
+			return substituirChaveCaso2A(noAtual.getFilho(0));
+		}
+	}
+	
+	private int passarChaveADireita(NoB noAtual, int index) { //(!)
+		
+		return 0;
+	}
+	
+	private int passarChaveAEsquerda() { //(!)
+		
+		return 0;
+	}
+
+	
+	private void fundirFilhos(NoB noPai, int index) {
+		NoB noFilhoA = noPai.getFilho(index);
+		NoB noFilhoB = noPai.getFilho(index+1);
+		NoB novoFilho = new NoB(noFilhoA.isLeaf(), noFilhoA.getFilho(0));
+		
+		
+		//cOPIA OS VALORES
+		for(int i = 0; i < t-1; i++) {		//NECESSÁRIO TESTE MINUNCIOSO
+			novoFilho.addChave(noFilhoA.getChave(i));
+			novoFilho.setFilho(i+1, noFilhoA.getFilho(i+1));
+		}
+		novoFilho.addChave(noPai.getChave(index));
+		novoFilho.setFilho(t, noFilhoB.getFilho(0));
+		for(int i = 0; i < t-1; i++) {
+			novoFilho.addChave(noFilhoB.getChave(i));
+			novoFilho.setFilho(i+1+t, noFilhoB.getFilho(i+1));
+		}
+		//-----
+		
+		noPai.removeChave(index);
+		noPai.setFilho(index, novoFilho);
+	}
+	
 	
 	//Buscar chave
 	public NoB buscarChave(int chave) {
@@ -116,5 +294,13 @@ public class ArvoreB {
 		}
 	}
 	
+	
 	//toString
+	@Override
+	public String toString() {
+		String texto = "Arvore (t = "+t+"):\n";
+		texto = texto.concat(String.valueOf(root));
+		
+		return texto;
+	}
 }

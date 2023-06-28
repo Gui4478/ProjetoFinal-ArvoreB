@@ -29,6 +29,10 @@ public class NoB {
 		return chaves.get(index);
 	}
 	
+	public void setChave(int index, int chave) {
+		chaves.set(index, chave);
+	}
+	
 	public void addChave(Integer chave) {
 		int i = 0;
 		while(i < chaves.size() && chave > chaves.get(i)) {
@@ -65,9 +69,40 @@ public class NoB {
 	}
 	
 	
-	//@Override
-	/* toString(int t?) {
-	 * 	retorna a chave, o valor e a uma lista de chaves
-	 * }
-	 */
+	@Override
+	public String toString() {
+		String texto = "NoB " + chaves + "\n";
+		
+		if(!leaf) {
+			for(int i = 0; i <= chaves.size(); i++) {
+				texto = texto.concat(filhoToString("", filhos.get(i), 1));
+			}
+		}
+		
+		return texto;
+	}
+	
+	private String filhoToString(String texto, NoB noAtual, int contador) {
+		for(int i = 0; i < contador; i++) {
+			texto = texto.concat("   -");
+		}
+		
+		texto = texto.concat("> NoB [");
+		for(int i = 0; i < noAtual.getSizeOfChaves(); i++) {
+			texto = texto.concat(String.valueOf(noAtual.getChave(i)));
+			
+			if(i < noAtual.getSizeOfChaves()-1) {
+				texto = texto.concat(", ");
+			}
+		}
+		texto = texto.concat("]\n");
+		
+		if(!noAtual.isLeaf()) {
+			for(int i = 0; i <= noAtual.getSizeOfChaves(); i++) {
+				texto = filhoToString(texto, noAtual.getFilho(i), contador+1);
+			}
+		}
+		
+		return texto;
+	}
 }

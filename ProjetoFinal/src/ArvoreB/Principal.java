@@ -20,12 +20,28 @@ public class Principal {
 		arvore.addChave(4);
 		arvore.addChave(15);
 		arvore.addChave(10);
+		arvore.addChave(24);
+		
+		//System.out.println(arvore);
+		
+		arvore.removeChave(2);
+		arvore.removeChave(23);
+		arvore.removeChave(24);
+		
+		System.out.println(arvore);
+		
+		/*
+		arvore.buscarChave(6);
+		arvore.buscarChave(14);
+		arvore.buscarChave(23);
+		
 
 		arvore.removeChave(2);
 		arvore.removeChave(18);
 		arvore.removeChave(7);
 		arvore.removeChave(14);
 		arvore.removeChave(6);
+		//*/
 		
 		System.out.println("fim");
 	}
