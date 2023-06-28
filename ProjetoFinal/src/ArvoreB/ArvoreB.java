@@ -67,54 +67,6 @@ public class ArvoreB {
 	
 	//remover
 	public void removeChave(int chave) {
-		//recursão até chegar no alvo	
-		
-		
-		//Caso 1 - remoção simples
-		//Se (for uma folha e tiver t ou mais chaves)
-			//Deleta a chave
-			//return;
-		
-		//Caso 2 - remoção por filhos
-		//Senão, Se (não for uma folha)
-			//Se (um dos filhos tiver t ou mais chaves)
-				//(*) Chama um metodo recursivo que:
-					//Se (for uma folha)
-						//Manda a chave desejada para cima
-					//Senão, Se (um dos filhos adjacentes a chave possui t ou mais chaves)
-						//recursividade para o filho
-						//Manda a chave recebida pra cima
-					//Senão
-						//funde os filhos adjacentes com a chave
-						//recursividade consigo mesmo
-						//manda a chave recebida para cima
-				//Substitue a chave a ser deletada pela recebida
-				//return;
-			//Senão, Se (possui menos que t chaves)
-				//return;
-			//Senão, Se os filhos possuem menos que t chaves)
-				//Desce a chave a ser deletada e a funde com esse filhos
-				//recursividade consigo mesmo
-				//return;
-		
-		//...
-		//Caso 3 - remoção por pai
-		//Se (for raiz ou possui t ou mais chaves)
-			//Se (filho(i) e um dos irmãos adjacentes possuem menos de t chaves)
-				//funde filho com um deles
-		
-		//recursão para o próximo nó
-		
-		//Se (resultado da recurção do filhoA for 'true')
-			//Se (há irmãoB do filhoA com t ou mais chaves)
-				//Se (irmãoB for folha)
-					//passar uma chave de B pro pai, e do pai pro A
-				//Senão
-					//metodo de remover chave para retirar uma chave de B e passar pro pai, e do pai pro A
-					//AVISO: se ele não é folha então também têm que entrar um filho junto, mas isso não é possivel
-		
-		
-		
 		removeChave(chave, root);
 	}
 	
