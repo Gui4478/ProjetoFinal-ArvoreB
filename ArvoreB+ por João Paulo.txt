@@ -1,0 +1,462 @@
+package ArvoreBM;
+
+import java.util.*;
+
+public class ArvoreBm {
+	int m;
+	NoInteiro raiz;
+	NoFolha primeiraFolha;
+
+	// Usarei "Dicionary" é representado usando uma estrutura de dados chamada
+	// interface Map
+
+	// Busca binaria
+	private int buscaBinaria(ParDicionario[] dps, int numPairs, int t) {
+		Comparator<ParDicionario> c = new Comparator<ParDicionario>() {
+			@Override
+			public int compare(ParDicionario o1, ParDicionario o2) {
+				Integer a = Integer.valueOf(o1.item);
+				Integer b = Integer.valueOf(o2.item);
+				return a.compareTo(b);
+			}
+		};
+		return Arrays.binarySearch(dps, 0, numPairs, new ParDicionario(t, 0), c);
+	}
+
+	// Encontra o nó folha
+	private NoFolha encontraNoFolha(int item) {
+
+		Integer[] itens = this.raiz.itens;
+		int i;
+
+		for (i = 0; i < this.raiz.combinar - 1; i++) {
+			if (item < itens[i]) {
+				break;
+			}
+		}
+
+		No crianca = this.raiz.ponteirosFihos[i];
+		if (crianca instanceof NoFolha) {
+			return (NoFolha) crianca;
+		} else {
+			return encontrarNoFolha((NoInteiro) crianca, item);
+		}
+	}
+
+	// Encontra o nó folha
+	private NoFolha encontrarNoFolha(NoInteiro no, int item) {
+
+		Integer[] itens = no.itens;
+		int i;
+
+		for (i = 0; i < no.combinar - 1; i++) {
+			if (item < itens[i]) {
+				break;
+			}
+		}
+		No filho = no.ponteirosFihos[i];
+		if (filho instanceof NoFolha) {
+			return (NoFolha) filho;
+		} else {
+			return encontrarNoFolha((NoInteiro) no.ponteirosFihos[i], item);
+		}
+	}
+
+	// Obtém o ponto médio
+	private int getPontoMedio() {
+		return (int) Math.ceil((this.m + 1) / 2.0) - 1;
+	}
+
+	private boolean estaVazia() {
+		return primeiraFolha == null;
+	}
+
+	private int pesquisaLinearNula(ParDicionario[] dps) {
+		for (int i = 0; i < dps.length; i++) {
+			if (dps[i] == null) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private int pesquisaLinearNula(No[] pointers) {
+		for (int i = 0; i < pointers.length; i++) {
+			if (pointers[i] == null) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private void classificaDicionario(ParDicionario[] dicionário) {
+		Arrays.sort(dicionário, new Comparator<ParDicionario>() {
+			@Override
+			public int compare(ParDicionario o1, ParDicionario o2) {
+				if (o1 == null && o2 == null) {
+					return 0;
+				}
+				if (o1 == null) {
+					return 1;
+				}
+				if (o2 == null) {
+					return -1;
+				}
+				return o1.compareTo(o2);
+			}
+		});
+	}
+
+	private No[] ponteiroFilhoDividido(NoInteiro em, int dividir) {
+
+		No[] ponteiros = em.ponteirosFihos;
+		No[] meioPonteiros = new No[this.m + 1];
+
+		for (int i = dividir + 1; i < ponteiros.length; i++) {
+			meioPonteiros[i - dividir - 1] = ponteiros[i];
+			em.removePointer(i);
+		}
+
+		return meioPonteiros;
+	}
+
+	private ParDicionario[] dividirDicionário(NoFolha em, int dividir) {
+
+		ParDicionario[] dicionario = em.dicionário;
+
+		ParDicionario[] meioDitado = new ParDicionario[this.m];
+
+		for (int i = dividir; i < dicionario.length; i++) {
+			meioDitado[i - dividir] = dicionario[i];
+			em.delete(i);
+		}
+
+		return meioDitado;
+	}
+
+	private void noInteiroDividido(NoInteiro em) {
+
+		NoInteiro pai = em.pai;
+
+		int pontoMedio = getPontoMedio();
+		int novaChavePrincipal = em.itens[pontoMedio];
+		Integer[] meiaChaves = chavesDivididas(em.itens, pontoMedio);
+		No[] meioPonteiro = ponteiroFilhoDividido(em, pontoMedio);
+
+		em.combinar = pesquisaLinearNula(em.ponteirosFihos);
+
+		NoInteiro irmao = new NoInteiro(this.m, meiaChaves, meioPonteiro);
+		for (No ponteiro : meioPonteiro) {
+			if (ponteiro != null) {
+				ponteiro.pai = irmao;
+			}
+		}
+
+		irmao.irmaoOk = em.irmaoOk;
+		if (irmao.irmaoOk != null) {
+		}
+		em.irmaoOk = irmao;
+		if (pai == null) {
+
+			Integer[] itens = new Integer[this.m];
+			itens[0] = novaChavePrincipal;
+			NoInteiro novaRaiz = new NoInteiro(this.m, itens);
+			novaRaiz.anexarPonteiroFilho(em);
+			novaRaiz.anexarPonteiroFilho(irmao);
+			this.raiz = novaRaiz;
+
+			em.pai = novaRaiz;
+			irmao.pai = novaRaiz;
+
+		} else {
+
+			pai.itens[pai.combinar - 1] = novaChavePrincipal;
+			Arrays.sort(pai.itens, 0, pai.combinar);
+
+			int indicePonteiro = pai.findIndexOfPointer(em) + 1;
+			pai.inserirPonteiroFilho(irmao, indicePonteiro);
+			irmao.pai = pai;
+		}
+	}
+
+	private Integer[] chavesDivididas(Integer[] itens, int dividir) {
+
+		Integer[] meioItens = new Integer[this.m];
+
+		itens[dividir] = null;
+
+		for (int i = dividir + 1; i < itens.length; i++) {
+			meioItens[i - dividir - 1] = itens[i];
+			itens[i] = null;
+		}
+
+		return meioItens;
+	}
+
+	public void inserir(int item, double valor) {
+		if (estaVazia()) {
+
+			NoFolha ln = new NoFolha(this.m, new ParDicionario(item, valor));
+
+			this.primeiraFolha = ln;
+
+		} else {
+			NoFolha ln = (this.raiz == null) ? this.primeiraFolha : encontraNoFolha(item);
+
+			if (!ln.inserir(new ParDicionario(item, valor))) {
+
+				ln.dicionário[ln.numerosPares] = new ParDicionario(item, valor);
+				ln.numerosPares++;
+				classificaDicionario(ln.dicionário);
+
+				int pontoMedio = getPontoMedio();
+				ParDicionario[] meioDitado = dividirDicionário(ln, pontoMedio);
+
+				if (ln.pai == null) {
+
+					Integer[] itens_pai = new Integer[this.m];
+					itens_pai[0] = meioDitado[0].item;
+					NoInteiro pai = new NoInteiro(this.m, itens_pai);
+					ln.pai = pai;
+					pai.anexarPonteiroFilho(ln);
+
+				} else {
+					int novoIntemPai = meioDitado[0].item;
+					ln.pai.itens[ln.pai.combinar - 1] = novoIntemPai;
+					Arrays.sort(ln.pai.itens, 0, ln.pai.combinar);
+				}
+
+				NoFolha novoNoFolha = new NoFolha(this.m, meioDitado, ln.pai);
+
+				int indicePonteiro = ln.pai.findIndexOfPointer(ln) + 1;
+				ln.pai.inserirPonteiroFilho(novoNoFolha, indicePonteiro);
+
+				novoNoFolha.irmaoOk = ln.irmaoOk;
+				if (novoNoFolha.irmaoOk != null) {
+					novoNoFolha.irmaoOk.irmaoEsquerdo = novoNoFolha;
+				}
+				ln.irmaoOk = novoNoFolha;
+				novoNoFolha.irmaoEsquerdo = ln;
+
+				if (this.raiz == null) {
+
+					this.raiz = ln.pai;
+
+				} else {
+					NoInteiro em = ln.pai;
+					while (em != null) {
+						if (em.estaCheio()) {
+							noInteiroDividido(em);
+						} else {
+							break;
+						}
+						em = em.pai;
+					}
+				}
+			}
+		}
+	}
+
+	public Double procurar(int item) {
+
+		if (estaVazia()) {
+			return null;
+		}
+
+		NoFolha ln = (this.raiz == null) ? this.primeiraFolha : encontraNoFolha(item);
+
+		ParDicionario[] dps = ln.dicionário;
+		int indice = buscaBinaria(dps, ln.numerosPares, item);
+
+		if (indice < 0) {
+			return null;
+		} else {
+			return dps[indice].valor;
+		}
+	}
+
+	public ArrayList<Double> procurar(int limiteInferior, int limiteSuperior) {
+
+		ArrayList<Double> valor = new ArrayList<Double>();
+
+		NoFolha noAtual = this.primeiraFolha;
+		while (noAtual != null) {
+
+			ParDicionario dps[] = noAtual.dicionário;
+			for (ParDicionario dp : dps) {
+
+				if (dp == null) {
+					break;
+				}
+
+				if (limiteInferior <= dp.item && dp.item <= limiteSuperior) {
+					valor.add(dp.valor);
+				}
+			}
+			noAtual = noAtual.irmaoOk;
+
+		}
+
+		return valor;
+	}
+
+	public ArvoreBm(int m) {
+		this.m = m;
+		this.raiz = null;
+	}
+
+	public class No {
+		NoInteiro pai;
+	}
+
+	private class NoInteiro extends No {
+		int grauMaximo;
+		int grauMinimo;
+		int combinar;
+		NoInteiro irmaoOk;
+		Integer[] itens;
+		No[] ponteirosFihos;
+
+		private void anexarPonteiroFilho(No ponteiro) {
+			this.ponteirosFihos[combinar] = ponteiro;
+			this.combinar++;
+		}
+
+		private int findIndexOfPointer(No ponteiro) {
+			for (int i = 0; i < ponteirosFihos.length; i++) {
+				if (ponteirosFihos[i] == ponteiro) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		private void inserirPonteiroFilho(No ponteiro, int indice) {
+			for (int i = combinar - 1; i >= indice; i--) {
+				ponteirosFihos[i + 1] = ponteirosFihos[i];
+			}
+			this.ponteirosFihos[indice] = ponteiro;
+			this.combinar++;
+		}
+
+		private boolean estaCheio() {
+			return this.combinar == grauMaximo + 1;
+		}
+
+		private void removePointer(int indice) {
+			this.ponteirosFihos[indice] = null;
+			this.combinar--;
+		}
+
+		private NoInteiro(int m, Integer[] itens) {
+			this.grauMaximo = m;
+			this.grauMinimo = (int) Math.ceil(m / 2.0);
+			this.combinar = 0;
+			this.itens = itens;
+			this.ponteirosFihos = new No[this.grauMaximo + 1];
+		}
+
+		private NoInteiro(int m, Integer[] itens, No[] ponteiro) {
+			this.grauMaximo = m;
+			this.grauMinimo = (int) Math.ceil(m / 2.0);
+			this.combinar = pesquisaLinearNula(ponteiro);
+			this.itens = itens;
+			this.ponteirosFihos = ponteiro;
+		}
+	}
+
+	public class NoFolha extends No {
+		int numeroMaximoPares;
+		int numeroMinimoPares;
+		int numerosPares;
+		NoFolha irmaoEsquerdo;
+		NoFolha irmaoOk;
+		ParDicionario[] dicionário;
+
+		public void delete(int indice) {
+			this.dicionário[indice] = null;
+			numerosPares--;
+		}
+
+		public boolean inserir(ParDicionario dp) {
+			if (this.estaCheio()) {
+				return false;
+			} else {
+				this.dicionário[numerosPares] = dp;
+				numerosPares++;
+				Arrays.sort(this.dicionário, 0, numerosPares);
+
+				return true;
+			}
+		}
+
+		public boolean e_deficiente() {
+			return numerosPares < numeroMinimoPares;
+		}
+
+		public boolean estaCheio() {
+			return numerosPares == numeroMaximoPares;
+		}
+
+		public boolean e_imprestavel() {
+			return numerosPares > numeroMinimoPares;
+		}
+
+		public boolean e_mesclavel() {
+			return numerosPares == numeroMinimoPares;
+		}
+
+		public NoFolha(int m, ParDicionario dp) {
+			this.numeroMaximoPares = m - 1;
+			this.numeroMinimoPares = (int) (Math.ceil(m / 2) - 1);
+			this.dicionário = new ParDicionario[m];
+			this.numerosPares = 0;
+			this.inserir(dp);
+		}
+
+		public NoFolha(int m, ParDicionario[] dps, NoInteiro pai) {
+			this.numeroMaximoPares = m - 1;
+			this.numeroMinimoPares = (int) (Math.ceil(m / 2) - 1);
+			this.dicionário = dps;
+			this.numerosPares = pesquisaLinearNula(dps);
+			this.pai = pai;
+		}
+	}
+
+	public class ParDicionario implements Comparable<ParDicionario> {
+		int item;
+		double valor;
+
+		public ParDicionario(int item, double valor) {
+			this.item = item;
+			this.valor = valor;
+		}
+
+		public int compareTo(ParDicionario o) {
+			if (item == o.item) {
+				return 0;
+			} else if (item > o.item) {
+				return 1;
+			} else {
+				return -1;
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		ArvoreBm bpt = null;
+		bpt = new ArvoreBm(3);
+		bpt.inserir(5, 32);
+		bpt.inserir(10, 16);
+		bpt.inserir(20, 26);
+		bpt.inserir(30, 36);
+		bpt.inserir(40, 8);
+
+		if (bpt.procurar(40) != null) {
+			System.out.println("Encontrado");
+		} else {
+			System.out.println("Não Encontrado");
+		}
+
+	}
+}
