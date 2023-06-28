@@ -161,14 +161,11 @@ public class ArvoreB {
 		} else if(!noAtual.isLeaf()) {
 			//Não possui a chave a ser deletada:
 			
-			//Caso 3.a
-			//Se (for raiz ou possui t ou mais chaves)
-				//Se (filho(i) e os dois irmãos adjacentes possuem menos de t chaves)
-					//funde filho com um deles
+			//Caso 3.a - Funde dois nós com t-1 chaves pelo caminho
 			if((noAtual.equals(root) || noAtual.getSizeOfChaves() >= t) && (noAtual.getFilho(i).getSizeOfChaves() < t)) {
 				if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() < t) {
 					fundirFilhos(noAtual, i-1);
-				} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() < t) {
+				} else if(i < noAtual.getFilho(i).getSizeOfChaves() && noAtual.getFilho(i+1).getSizeOfChaves() < t) {
 					fundirFilhos(noAtual, i);
 				}
 			}
@@ -179,22 +176,27 @@ public class ArvoreB {
 			
 			boolean retry = removeChave(chave, noAtual.getFilho(i));
 			
-			//Caso 3.b
+			//Caso 3.b - Desloca de algum irmão e tenta novamente 
 			if(retry) {
 				if(noAtual.getFilho(i).isLeaf()) {
-					//Se (irmão a esquerda ou a direita possui t ou mais chaves)
-						//passa do irmão pro filho (metodo?)
 					if(0 < i && noAtual.getFilho(i-1).getSizeOfChaves() > t) {
 						//passarChaveADireita(noAtual, i-1);
 						int chaveDeslocada = substituirChaveADireita(noAtual.getFilho(i-1));
-						//...
+						int chaveDesejada = noAtual.getChave(i-1);
+						noAtual.setChave(i-1, chaveDeslocada);
+						noAtual.getFilho(i).addChave(chaveDesejada);
+						removeChave(chave, noAtual.getFilho(i));
 						
 					} else if(i < noAtual.getFilho(i).getSizeOfChaves()&& noAtual.getFilho(i+1).getSizeOfChaves() > t) {
 						int chaveDeslocada = substituirChaveAEsquerda(noAtual.getFilho(i+1));
-						//...
+						int chaveDesejada = noAtual.getChave(i);
+						noAtual.setChave(i, chaveDeslocada);
+						noAtual.getFilho(i).addChave(chaveDesejada);
+						removeChave(chave, noAtual.getFilho(i));
+						
 					}
 				} else {
-					System.out.println("Não foi possivel excluir esse nó");
+					System.out.println("Recomenta-se que apenas o valor do nó seja excluido.");
 				}
 			}
 		}
@@ -246,15 +248,13 @@ public class ArvoreB {
 		}
 	}
 
-	
 	private void fundirFilhos(NoB noPai, int index) {
 		NoB noFilhoA = noPai.getFilho(index);
 		NoB noFilhoB = noPai.getFilho(index+1);
 		NoB novoFilho = new NoB(noFilhoA.isLeaf(), noFilhoA.getFilho(0));
 		
 		
-		//cOPIA OS VALORES
-		for(int i = 0; i < t-1; i++) {		//NECESSÁRIO TESTE MINUNCIOSO
+		for(int i = 0; i < t-1; i++) {
 			novoFilho.addChave(noFilhoA.getChave(i));
 			novoFilho.setFilho(i+1, noFilhoA.getFilho(i+1));
 		}
@@ -264,7 +264,6 @@ public class ArvoreB {
 			novoFilho.addChave(noFilhoB.getChave(i));
 			novoFilho.setFilho(i+1+t, noFilhoB.getFilho(i+1));
 		}
-		//-----
 		
 		noPai.removeChave(index);
 		noPai.setFilho(index, novoFilho);

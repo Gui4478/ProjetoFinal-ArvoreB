@@ -22,17 +22,13 @@ public class Principal {
 		arvore.addChave(10);
 		arvore.addChave(24);
 		
+		arvore.addChave(30);//*/
+		
 		//System.out.println(arvore);
 		
-		arvore.removeChave(10);
-		
+		arvore.removeChave(2);
 		System.out.println(arvore);
 		
-		arvore.removeChave(14);
-		
-		System.out.println(arvore);
-		
-		//Lembrete: estava revisando o caso 2 (.a e .b funcionam, falta .c) 
 		
 		/*
 		arvore.buscarChave(6);

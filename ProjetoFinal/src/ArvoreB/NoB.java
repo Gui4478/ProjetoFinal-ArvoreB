@@ -1,6 +1,8 @@
 package ArvoreB;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NoB {
 	private List<Integer> chaves = new ArrayList<Integer>();
@@ -103,5 +105,5 @@ public class NoB {
 		}
 		
 		return texto;
-	}
+	}//*/
 }
